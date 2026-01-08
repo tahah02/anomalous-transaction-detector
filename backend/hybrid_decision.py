@@ -41,7 +41,7 @@ def make_decision(txn, user_stats, model, features, autoencoder=None):
             result["reasons"].append(
                 f"ML anomaly detected: abnormal behavior pattern (risk score {score:.4f})"
             )
-    if autoencoder is not None and autoencoder.is_available():
+    if autoencoder is not None:
         ae_features = {
             'transaction_amount': txn.get('amount', 0),
             'flag_amount': 1 if txn.get('transfer_type') == 'S' else 0,

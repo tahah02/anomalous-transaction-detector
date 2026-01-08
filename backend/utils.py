@@ -1,4 +1,5 @@
 import os
+import joblib
 
 def ensure_data_dir():
     os.makedirs('data', exist_ok=True)
@@ -30,3 +31,28 @@ MODEL_FEATURES = [
     'user_multiple_accounts_flag','cross_account_transfer_ratio',
     'geo_anomaly_flag','is_new_beneficiary','beneficiary_txn_count_30d'
 ]
+
+def load_model():
+    try:
+        model_path = get_model_path()
+        scaler_path = 'backend/model/isolation_forest_scaler.pkl'
+        
+        # Load model (could be dict or direct model)
+        model_data = joblib.load(model_path)
+        if isinstance(model_data, dict):
+            model = model_data.get('model', model_data)
+        else:
+            model = model_data
+            
+        # Load scaler
+        scaler = None
+        try:
+            scaler = joblib.load(scaler_path)
+        except FileNotFoundError:
+            print("Scaler not found, using None")
+        
+        return model, MODEL_FEATURES, scaler
+    
+    except Exception as e:
+        print(f"Error loading model: {e}")
+        return None, None, None

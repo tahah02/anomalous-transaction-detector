@@ -4,14 +4,12 @@ import os
 from datetime import datetime
 import csv
 
-from backend.utils import get_feature_engineered_path, get_model_path
+from backend.utils import get_feature_engineered_path, get_model_path, load_model
 from backend.hybrid_decision import make_decision
 from backend.rule_engine import calculate_all_limits
-from backend.model_training import load_model
 from backend.autoencoder import AutoencoderInference
 
 def save_transaction_to_csv(cid, amount, t_type, status="Approved"):
-    """Save transaction to history CSV file"""
     file_name = 'transaction_history.csv'
     file_exists = os.path.isfile(file_name)
     
@@ -21,10 +19,9 @@ def save_transaction_to_csv(cid, amount, t_type, status="Approved"):
             writer.writerow(['CustomerID', 'Amount', 'Type', 'Status', 'Timestamp'])
         writer.writerow([cid, amount, t_type, status, datetime.now()])
 
-st.set_page_config(page_title="Banking Fraud Detection", page_icon="🏦", layout="wide")
+st.set_page_config(page_title="Banking Fraud Detection", layout="wide")
 
 def init_state():
-    """Initialize session state variables"""
     if 'logged_in' not in st.session_state:
         st.session_state.logged_in = False
     if 'customer_id' not in st.session_state:
@@ -32,28 +29,25 @@ def init_state():
     if 'result' not in st.session_state:
         st.session_state.result = None
     if 'txn_history' not in st.session_state:
-        st.session_state.txn_history = {}  # {cid: [datetime, datetime, ...]}
+        st.session_state.txn_history = {}  
     if 'session_count' not in st.session_state:
-        st.session_state.session_count = {}  # {cid: count}
+        st.session_state.session_count = {}  
     if 'monthly_spending' not in st.session_state:
-        st.session_state.monthly_spending = {}  # {cid: amount}
+        st.session_state.monthly_spending = {}  
 
 def get_velocity(cid, account_no):
-    """Calculate transaction velocity - how many txns in last 10min and 1hour"""
     account_key = f"{cid}_{account_no}"
     now = datetime.now()
     
     history = st.session_state.txn_history.get(account_key, [])
     
-    # Count transactions in windows
     count_10min = sum(1 for t in history if (now - t).total_seconds() < 600)
     count_1hour = sum(1 for t in history if (now - t).total_seconds() < 3600)
     
-    # Time since last transaction
     if history:
         time_since_last = (now - max(history)).total_seconds()
     else:
-        time_since_last = 3600  # Default 1 hour if no history
+        time_since_last = 3600 
     
     return {
         'txn_count_10min': count_10min,
@@ -62,19 +56,16 @@ def get_velocity(cid, account_no):
     }
 
 def record_transaction(cid, account_no):
-    """Record a transaction timestamp for velocity tracking"""
     account_key = f"{cid}_{account_no}"
     if account_key not in st.session_state.txn_history:
         st.session_state.txn_history[account_key] = []
     st.session_state.txn_history[account_key].append(datetime.now())
     
-    # Increment session count
     if account_key not in st.session_state.session_count:
         st.session_state.session_count[account_key] = 0
     st.session_state.session_count[account_key] += 1
 
 def add_monthly_spending(cid, account_no, amount):
-    """Add to monthly spending tracker"""
     account_key = f"{cid}_{account_no}"
     if account_key not in st.session_state.monthly_spending:
         st.session_state.monthly_spending[account_key] = 0.0
@@ -82,7 +73,6 @@ def add_monthly_spending(cid, account_no, amount):
 
 @st.cache_data
 def load_data():
-    """Load feature engineered data"""
     path = get_feature_engineered_path()
     if os.path.exists(path):
         return pd.read_csv(path)
@@ -93,7 +83,6 @@ def load_data():
 
 @st.cache_resource
 def get_model():
-    """Load trained model"""
     if os.path.exists(get_model_path()):
         return load_model()
     else:
@@ -103,15 +92,13 @@ def get_model():
 
 @st.cache_resource
 def get_autoencoder():
-    """Load Autoencoder inference module."""
     ae = AutoencoderInference()
-    if ae.load_artifacts():
+    if ae.load():
         return ae
     else:
         return None
 
 def get_monthly_spending_from_csv(cust_data, account_no, amt_col):
-    """Get spending for current month from CSV data for specific account"""
     current_month = datetime.now().month
     current_year = datetime.now().year
     
@@ -119,8 +106,6 @@ def get_monthly_spending_from_csv(cust_data, account_no, amt_col):
         cust_data = cust_data.copy()
         if cust_data['CreateDate'].dtype == 'object':
             cust_data['CreateDate'] = pd.to_datetime(cust_data['CreateDate'], errors='coerce')
-        
-        # Filter by account number as well
         account_data = cust_data[cust_data['FromAccountNo'].astype(str) == str(account_no)]
         monthly_data = account_data[
             (account_data['CreateDate'].dt.month == current_month) & 
@@ -130,7 +115,6 @@ def get_monthly_spending_from_csv(cust_data, account_no, amt_col):
     return 0.0
 
 def login_page(df):
-    """Render login page"""
     st.title("🏦 Banking Fraud Detection System")
     st.subheader("Login")
     
@@ -154,15 +138,12 @@ def login_page(df):
 
 
 def dashboard(df, model, features, scaler=None, autoencoder=None):
-    """Render main dashboard"""
     cid = str(st.session_state.customer_id)
     amt_col = 'transaction_amount' if 'transaction_amount' in df.columns else 'AmountInAed'
     cust_data = df[df['CustomerId'].astype(str) == cid]
 
-    # === MAIN CONTENT ===
     st.title("Fraud Detection Dashboard")
     
-    # Step 1: Account Selection (MANDATORY)
     st.subheader("Step 1: Select Account")
     accounts = [str(a) for a in cust_data['FromAccountNo'].dropna().unique()] if 'FromAccountNo' in cust_data.columns and len(cust_data) > 0 else ["Default"]
     
@@ -172,19 +153,15 @@ def dashboard(df, model, features, scaler=None, autoencoder=None):
         
     account = st.selectbox("Select Account", accounts, label_visibility="collapsed")
     
-    # Filter data for selected account
     account_data = cust_data[cust_data['FromAccountNo'].astype(str) == str(account)]
     
-    # Get account-specific counts
     csv_count = len(account_data)
     account_key = f"{cid}_{account}"
     session_count = st.session_state.session_count.get(account_key, 0)
     total_txns = csv_count + session_count
-    
-    # Get velocity for display
+
     vel = get_velocity(cid, account)
 
-    # === SIDEBAR ===
     st.sidebar.title("Navigation")
     st.sidebar.markdown(f"**Customer ID:** {cid}")
     st.sidebar.markdown(f"**Account:** {account}")
@@ -197,8 +174,7 @@ def dashboard(df, model, features, scaler=None, autoencoder=None):
     
     st.sidebar.markdown("---")
     
-    # Autoencoder status
-    if autoencoder is not None and autoencoder.is_available():
+    if autoencoder is not None:
         st.sidebar.success("🧠 Autoencoder: Active")
     else:
         st.sidebar.warning("🧠 Autoencoder: Unavailable")
@@ -245,8 +221,7 @@ def dashboard(df, model, features, scaler=None, autoencoder=None):
         st.sidebar.warning("No transaction history for this account")
 
     st.markdown("---")
-    
-    # Step 2: Transaction Details
+
     st.subheader("Step 2: Transaction Details")
     c1, c2, c3 = st.columns(3)
     
@@ -272,27 +247,20 @@ def dashboard(df, model, features, scaler=None, autoencoder=None):
     
     st.markdown("---")
     
-    # Step 3: Process
     st.subheader("Step 3: Process Transaction")
-    
-    # Debug: Show current velocity before processing
+ 
     current_vel = get_velocity(cid, account)
     st.caption(f"🔍 Debug: Current recorded txns - 10min: {current_vel['txn_count_10min']}, 1hour: {current_vel['txn_count_1hour']}")
     
     if st.button("Process Transaction", type="primary", use_container_width=True):
-        # Get current velocity BEFORE recording (to check limits)
         current_vel = get_velocity(cid, account)
         
-        # Add 1 for the current transaction being processed
         txn_count_10min = current_vel['txn_count_10min'] + 1
         txn_count_1hour = current_vel['txn_count_1hour'] + 1
         
-        # Calculate spending for this account
         csv_monthly = get_monthly_spending_from_csv(cust_data, account, amt_col)
         session_monthly = st.session_state.monthly_spending.get(account_key, 0.0)
         current_spending = csv_monthly + session_monthly
-
-        # Account-specific stats
         overall_avg = account_data[amt_col].mean() if len(account_data) > 0 else 5000
         overall_std = account_data[amt_col].std() if len(account_data) > 1 else 2000
         overall_max = account_data[amt_col].max() if len(account_data) > 0 else 15000
@@ -312,7 +280,6 @@ def dashboard(df, model, features, scaler=None, autoencoder=None):
             'current_month_spending': current_spending
         }
 
-        # Transaction data with velocity
         txn = {
             'amount': amount, 
             'transfer_type': t_type, 
@@ -322,8 +289,7 @@ def dashboard(df, model, features, scaler=None, autoencoder=None):
             'txn_count_1hour': txn_count_1hour,
             'time_since_last_txn': current_vel['time_since_last_txn']
         }
-        
-        # Make decision
+
         st.session_state.result = make_decision(txn, user_stats, model, features, autoencoder=autoencoder)
         st.session_state.result['amount'] = amount
         st.session_state.result['t_type'] = t_type
@@ -334,26 +300,22 @@ def dashboard(df, model, features, scaler=None, autoencoder=None):
 
     st.markdown("---")
     
-    # Step 4: Result
     st.subheader("Step 4: Transaction Result")
 
     if st.session_state.result:
         r = st.session_state.result
         t_type = r.get('t_type', 'O')
         result_account = r.get('account', account)
+
+        st.info(f" Velocity: {r.get('txn_count_10min', 0)} txns in 10min | {r.get('txn_count_1hour', 0)} txns in 1hour")
         
-        # Show velocity info
-        st.info(f"📊 Velocity: {r.get('txn_count_10min', 0)} txns in 10min | {r.get('txn_count_1hour', 0)} txns in 1hour")
-        
-        # Show Autoencoder info if available
         if r.get('ae_reconstruction_error') is not None:
-            ae_status = "🔴 Anomaly" if r.get('ae_flag', False) else "🟢 Normal"
+            ae_status = " Anomaly" if r.get('ae_flag', False) else " Normal"
             st.info(f"🔬 AE Error: {r['ae_reconstruction_error']:.4f} | Threshold: {r.get('ae_threshold', 'N/A'):.4f} | Status: {ae_status}")
         
         if r['is_fraud']:
-            st.error("⚠️ FRAUD ALERT - Transaction Flagged!")
-            
-            # Show all reasons
+            st.error(" FRAUD ALERT - Transaction Flagged!")
+
             for reason in r['reasons']:
                 if isinstance(reason, str):
                     st.warning(reason)
@@ -381,7 +343,7 @@ def dashboard(df, model, features, scaler=None, autoencoder=None):
                     st.rerun()
 
         else:
-            st.success("✅ SAFE TRANSACTION")
+            st.success(" SAFE TRANSACTION")
             st.info(f"Amount: AED {r['amount']:,.2f} | Threshold: AED {r['threshold']:,.2f}")
 
             if st.button("Confirm & Continue", type="primary"):
@@ -392,7 +354,6 @@ def dashboard(df, model, features, scaler=None, autoencoder=None):
                 st.rerun()
 
 def main():
-    """Main entry point"""
     init_state()
     
     df = load_data()
@@ -402,8 +363,6 @@ def main():
     model, features, scaler = get_model()
     if model is None:
         return
-    
-    # Load Autoencoder (optional - graceful degradation if unavailable)
     autoencoder = get_autoencoder()
     
     if st.session_state.logged_in:
