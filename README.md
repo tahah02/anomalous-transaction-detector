@@ -235,9 +235,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 **Contact**
 
-- **Project Maintainer**: [Your Name]
-- **Email**: [your.email@example.com]
-- **LinkedIn**: [Your LinkedIn Profile]
+- **Project Maintainer**: Muhammad Taha Hussain         
+- **Email**: muhammadtahahussain020@gmail.com
+- **LinkedIn**: www.linkedin.com/in/muhammad-taha-hussain-6b354a27a
 
 ---
 
