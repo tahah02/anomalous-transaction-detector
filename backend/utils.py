@@ -1,0 +1,32 @@
+import os
+
+def ensure_data_dir():
+    os.makedirs('data', exist_ok=True)
+    os.makedirs('models', exist_ok=True)
+
+def get_clean_csv_path():
+    return 'data/Clean.csv'
+
+def get_feature_engineered_path():
+    return 'data/feature_datasetv2.csv'
+
+def get_model_path():
+    return 'backend/model/isolation_forest.pkl'
+
+TRANSFER_TYPE_MAPPING = {'S': 'Overseas', 'I': 'Ajman', 'L': 'UAE', 'Q': 'Quick', 'O': 'Own'}
+TRANSFER_TYPE_ENCODED = {'S': 4, 'I': 1, 'L': 2, 'Q': 3, 'O': 0}
+TRANSFER_TYPE_RISK = {'S': 0.9, 'I': 0.1, 'L': 0.2, 'Q': 0.5, 'O': 0.0}
+
+MODEL_FEATURES = [
+    'transaction_amount','flag_amount','transfer_type_encoded','transfer_type_risk',
+    'channel_encoded','deviation_from_avg','amount_to_max_ratio','rolling_std',
+    'transaction_velocity','weekly_total','weekly_txn_count','weekly_avg_amount',
+    'weekly_deviation','amount_vs_weekly_avg','current_month_spending','monthly_txn_count',
+    'monthly_avg_amount','monthly_deviation','amount_vs_monthly_avg','hourly_total',
+    'hourly_count','daily_total','daily_count','hour','day_of_week','is_weekend',
+    'is_night','time_since_last','recent_burst','txn_count_30s','txn_count_10min',
+    'txn_count_1hour','user_avg_amount','user_std_amount','user_max_amount',
+    'user_txn_frequency','intl_ratio','user_high_risk_txn_ratio',
+    'user_multiple_accounts_flag','cross_account_transfer_ratio',
+    'geo_anomaly_flag','is_new_beneficiary','beneficiary_txn_count_30d'
+]
