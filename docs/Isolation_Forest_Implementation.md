@@ -5,6 +5,7 @@
 Isolation Forest is a **machine learning algorithm that detects anomalies by isolating outliers** rather than profiling normal data. Think of it as a smart forest ranger who can quickly spot the unusual animals in a forest by how easily they can be separated from the normal wildlife.
 
 ### **Core Concept: Isolation Principle**
+
 - **Normal Data**: Hard to isolate (requires many splits in decision trees)
 - **Anomalous Data**: Easy to isolate (requires few splits in decision trees)
 - **Fraud Detection**: Transactions that are easily isolated are likely fraudulent
@@ -12,6 +13,7 @@ Isolation Forest is a **machine learning algorithm that detects anomalies by iso
 ## 🏗 **Algorithm Architecture**
 
 ### **Forest Structure**
+
 ```
 Isolation Forest = Collection of Isolation Trees
     ↓
@@ -23,6 +25,7 @@ Decision = Compare Score Against Contamination Threshold
 ```
 
 ### **Tree Building Process**
+
 1. **Random Sampling**: Select random subset of data points
 2. **Random Feature Selection**: Choose random feature to split on
 3. **Random Split Value**: Pick random value between min/max of feature
@@ -32,6 +35,7 @@ Decision = Compare Score Against Contamination Threshold
 ## 🔧 **Training Process**
 
 ### **Data Preparation**
+
 ```python
 # Feature Loading (41 features from utils.MODEL_FEATURES)
 features = [
@@ -43,6 +47,7 @@ features = [
 ```
 
 ### **Model Configuration**
+
 ```python
 # Isolation Forest Parameters
 n_estimators = 100        # Number of trees in forest
@@ -53,6 +58,7 @@ max_features = 1.0        # Use all features
 ```
 
 ### **Training Pipeline**
+
 1. **Data Loading**: Load `feature_datasetv2.csv` with 41 engineered features
 2. **Feature Scaling**: StandardScaler normalization (mean=0, std=1)
 3. **Model Training**: Fit Isolation Forest on normal transaction patterns
@@ -62,6 +68,7 @@ max_features = 1.0        # Use all features
 ## ⚡ **Inference Process**
 
 ### **Real-time Scoring**
+
 ```python
 class IsolationForestInference:
     def score_transaction(self, features):
@@ -73,6 +80,7 @@ class IsolationForestInference:
 ```
 
 ### **Scoring Mechanism**
+
 - **Decision Function**: Returns anomaly score (more negative = more anomalous)
 - **Prediction**: Binary classification (1=normal, -1=anomaly)
 - **Threshold**: Automatically learned during training based on contamination rate
@@ -80,8 +88,9 @@ class IsolationForestInference:
 ## 📊 **Feature Importance in Isolation Forest**
 
 ### **High Impact Features**
+
 | Feature | Impact | Description |
-|---------|--------|-------------|
+| --- | --- | --- |
 | `transaction_amount` | Very High | Core transaction value - unusual amounts easily isolated |
 | `deviation_from_avg` | High | Deviation from user's normal spending pattern |
 | `amount_to_max_ratio` | High | Ratio to user's maximum transaction |
@@ -90,16 +99,18 @@ class IsolationForestInference:
 | `monthly_deviation` | Medium | Monthly behavior shifts |
 
 ### **Behavioral Pattern Features**
+
 | Feature | Impact | Description |
-|---------|--------|-------------|
+| --- | --- | --- |
 | `user_high_risk_txn_ratio` | High | Ratio of high-risk transactions |
 | `cross_account_transfer_ratio` | Medium | Cross-account transfer patterns |
 | `geo_anomaly_flag` | Medium | Geographic anomaly indicator |
 | `is_new_beneficiary` | Medium | New beneficiary relationship |
 
 ### **Temporal Features**
+
 | Feature | Impact | Description |
-|---------|--------|-------------|
+| --- | --- | --- |
 | `txn_count_30s` | High | Burst transaction detection |
 | `txn_count_10min` | High | Short-term velocity tracking |
 | `recent_burst` | High | Sudden activity indicator |
@@ -109,6 +120,7 @@ class IsolationForestInference:
 ## 🎯 **Anomaly Detection Capabilities**
 
 ### **What Isolation Forest Detects**
+
 1. **Statistical Outliers**: Transactions with unusual feature combinations
 2. **Volume Anomalies**: Unusually high or low transaction amounts
 3. **Frequency Anomalies**: Unusual transaction timing patterns
@@ -116,12 +128,14 @@ class IsolationForestInference:
 5. **Multi-dimensional Anomalies**: Complex patterns across multiple features
 
 ### **Strengths**
+
 - **No Labeled Data Required**: Unsupervised learning approach
 - **Efficient**: Linear time complexity O(n)
 - **Robust**: Works well with high-dimensional data (41 features)
 - **Interpretable**: Can identify which features contribute to anomaly score
 
 ### **Limitations**
+
 - **Contamination Assumption**: Requires estimate of fraud rate
 - **Normal Data Assumption**: Assumes majority of training data is normal
 - **Feature Scaling Sensitive**: Requires proper normalization
@@ -130,6 +144,7 @@ class IsolationForestInference:
 ## 🔄 **Model Lifecycle**
 
 ### **Training Phase** (`train_isolation_forest.py`)
+
 ```python
 class IsolationForestTrainer:
     def train(self):
@@ -142,6 +157,7 @@ class IsolationForestTrainer:
 ```
 
 ### **Inference Phase** (`isolation_forest.py`)
+
 ```python
 class IsolationForestInference:
     def score_transaction(self, features):
@@ -156,18 +172,21 @@ class IsolationForestInference:
 ## 📈 **Performance Metrics**
 
 ### **Training Metrics**
+
 - **Contamination Rate**: 10% (expected fraud rate)
 - **Feature Count**: 41 engineered features
 - **Training Time**: < 30 seconds on standard hardware
 - **Model Size**: ~2MB (model + scaler)
 
 ### **Inference Metrics**
+
 - **Processing Time**: < 20ms per transaction
 - **Memory Usage**: ~50MB loaded model
 - **Throughput**: 1000+ transactions per second
 - **Accuracy**: 85-90% fraud detection rate
 
 ### **Business Metrics**
+
 - **False Positive Rate**: < 5% (legitimate transactions flagged)
 - **True Positive Rate**: > 85% (actual fraud detected)
 - **Precision**: > 80% (flagged transactions are actually fraud)
@@ -176,6 +195,7 @@ class IsolationForestInference:
 ## 🛡 **Security & Robustness**
 
 ### **Input Validation**
+
 ```python
 # Feature Validation
 missing_features = [f for f in MODEL_FEATURES if f not in features]
@@ -185,12 +205,14 @@ if missing_features:
 ```
 
 ### **Error Handling**
+
 - **Model Loading Failures**: Graceful degradation
 - **Feature Scaling Issues**: Input validation and normalization
 - **Invalid Predictions**: Fallback to rule-based decisions
 - **Memory Issues**: Efficient model loading and caching
 
 ### **Production Considerations**
+
 - **Model Versioning**: Supports A/B testing and rollbacks
 - **Monitoring**: Tracks prediction distributions and model drift
 - **Alerting**: Notifications for unusual model behavior
@@ -199,14 +221,16 @@ if missing_features:
 ## 🔍 **Debugging & Monitoring**
 
 ### **Common Issues**
+
 | Issue | Cause | Solution |
-|-------|-------|---------|
+| --- | --- | --- |
 | High False Positives | Contamination rate too low | Increase contamination parameter |
 | Low Detection Rate | Contamination rate too high | Decrease contamination parameter |
 | Feature Scaling Errors | Inconsistent normalization | Verify scaler consistency |
 | Model Drift | Data distribution changes | Retrain model with recent data |
 
 ### **Monitoring Recommendations**
+
 - **Score Distribution**: Track anomaly score distributions over time
 - **Prediction Rates**: Monitor percentage of transactions flagged
 - **Feature Drift**: Detect changes in feature distributions
@@ -215,6 +239,7 @@ if missing_features:
 ## 🚀 **Integration with Other Components**
 
 ### **Rule Engine Integration**
+
 ```python
 # Priority: Rule Engine → Isolation Forest → Autoencoder
 if rule_engine_blocks:
@@ -226,11 +251,13 @@ else:
 ```
 
 ### **Autoencoder Complementarity**
+
 - **Isolation Forest**: Detects statistical outliers and unusual feature combinations
 - **Autoencoder**: Detects behavioral pattern deviations and subtle changes
 - **Combined**: Comprehensive coverage of different anomaly types
 
 ### **Feature Engineering Dependency**
+
 - **Relies on**: 41 features from `feature_engineering.py`
 - **Centralized Config**: Uses `MODEL_FEATURES` from `utils.py`
 - **Consistency**: Same features used for training and inference
@@ -238,6 +265,7 @@ else:
 ## 🔧 **Configuration & Tuning**
 
 ### **Key Parameters**
+
 ```python
 # Model Configuration
 CONTAMINATION = 0.1          # Expected fraud rate (10%)
@@ -248,6 +276,7 @@ RANDOM_STATE = 42            # Reproducibility seed
 ```
 
 ### **Tuning Guidelines**
+
 - **Contamination**: Adjust based on historical fraud rates
 - **N_Estimators**: More trees = better accuracy but slower inference
 - **Max_Samples**: Smaller samples = faster training but less stable
@@ -256,15 +285,15 @@ RANDOM_STATE = 42            # Reproducibility seed
 ## 🎯 **Business Value**
 
 ### **Fraud Detection Benefits**
+
 - **Automated Screening**: Reduces manual review workload by 70%
 - **Real-time Processing**: Decisions in milliseconds
 - **Scalable**: Handles millions of transactions per day
 - **Adaptive**: Learns from new transaction patterns
 
 ### **Cost Benefits**
+
 - **Reduced Fraud Losses**: Catches 85%+ of fraudulent transactions
 - **Lower False Positives**: Minimizes customer friction
 - **Operational Efficiency**: Automated decision making
 - **Compliance**: Meets regulatory fraud prevention requirements
-
-This Isolation Forest implementation provides robust statistical anomaly detection that forms the backbone of our fraud detection system, working seamlessly with rule-based controls and neural network behavioral analysis to create comprehensive transaction security.

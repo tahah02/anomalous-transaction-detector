@@ -45,7 +45,7 @@ Output Layer (41 features) [Reconstruction]
 ```python
 # Training Parameters
 epochs = 100
-batch_size = 32
+batch_size = 64
 validation_split = 0.1
 optimizer = 'adam'
 loss_function = 'mean_squared_error'

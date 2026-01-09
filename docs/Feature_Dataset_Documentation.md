@@ -7,9 +7,11 @@ The `feature_datasetv2.csv` file contains **41 engineered features** derived fro
 ## 🏗️ **Feature Categories**
 
 ### **Original Transaction Fields (24 columns)**
+
 These are preserved from the original dataset for reference and audit purposes.
 
 ### **Engineered ML Features (41 columns)**
+
 These are the features used by both Isolation Forest and Autoencoder models.
 
 ## 📋 **Complete Column Documentation**
@@ -46,7 +48,7 @@ These are the features used by both Isolation Forest and Autoencoder models.
 ### **💰 Core Transaction Features (5 features)**
 
 | Feature | Calculation | Description | Example | ML Impact |
-|---------|-------------|-------------|---------|-----------|
+| --- | --- | --- | --- | --- |
 | `transaction_amount` | `AmountInAed` | Transaction amount in AED | 500.3 | **Very High** - Primary fraud indicator |
 | `flag_amount` | `1 if TransferType=='S' else 0` | International transfer flag | 1 | **High** - International transfers are riskier |
 | `transfer_type_encoded` | `TRANSFER_TYPE_ENCODED[TransferType]` | Encoded transfer type | 4 | **High** - Different types have different risk profiles |
@@ -54,6 +56,7 @@ These are the features used by both Isolation Forest and Autoencoder models.
 | `channel_encoded` | `channel_mapping[ChannelId]` | Encoded channel identifier | 0 | **Medium** - Channel-specific fraud patterns |
 
 **Transfer Type Mappings:**
+
 ```python
 TRANSFER_TYPE_ENCODED = {'S': 4, 'I': 1, 'L': 2, 'Q': 3, 'O': 0}
 TRANSFER_TYPE_RISK = {'S': 0.9, 'I': 0.1, 'L': 0.2, 'Q': 0.5, 'O': 0.0}
@@ -63,7 +66,7 @@ TRANSFER_TYPE_RISK = {'S': 0.9, 'I': 0.1, 'L': 0.2, 'Q': 0.5, 'O': 0.0}
 ### **⏰ Temporal Features (8 features)**
 
 | Feature | Calculation | Description | Example | ML Impact |
-|---------|-------------|-------------|---------|-----------|
+| --- | --- | --- | --- | --- |
 | `hour` | `CreateDate.dt.hour` | Hour of transaction (0-23) | 16 | **Medium** - Fraud patterns vary by time |
 | `day_of_week` | `CreateDate.dt.dayofweek` | Day of week (0=Monday, 6=Sunday) | 2 | **Medium** - Weekend vs weekday patterns |
 | `is_weekend` | `1 if day_of_week >= 5 else 0` | Weekend transaction flag | 0 | **Medium** - Weekend transactions riskier |
@@ -75,7 +78,7 @@ TRANSFER_TYPE_RISK = {'S': 0.9, 'I': 0.1, 'L': 0.2, 'Q': 0.5, 'O': 0.0}
 ### **👤 User Behavioral Features (8 features)**
 
 | Feature | Calculation | Description | Example | ML Impact |
-|---------|-------------|-------------|---------|-----------|
+| --- | --- | --- | --- | --- |
 | `user_avg_amount` | `mean(user_historical_amounts)` | User's average transaction amount | 9124.09 | **Very High** - Baseline for comparison |
 | `user_std_amount` | `std(user_historical_amounts)` | Standard deviation of user amounts | 19093.33 | **High** - User's spending variability |
 | `user_max_amount` | `max(user_historical_amounts)` | User's maximum transaction | 96639.45 | **High** - Upper bound reference |
@@ -88,7 +91,7 @@ TRANSFER_TYPE_RISK = {'S': 0.9, 'I': 0.1, 'L': 0.2, 'Q': 0.5, 'O': 0.0}
 ### **🏦 Account & Relationship Features (6 features)**
 
 | Feature | Calculation | Description | Example | ML Impact |
-|---------|-------------|-------------|---------|-----------|
+| --- | --- | --- | --- | --- |
 | `num_accounts` | `unique_count(user_accounts)` | Number of accounts user has | 14 | **Medium** - Account diversity |
 | `user_multiple_accounts_flag` | `1 if num_accounts > 1 else 0` | Multiple accounts indicator | 1 | **Medium** - Multi-account usage pattern |
 | `cross_account_transfer_ratio` | `cross_account_txns / total_txns` | Cross-account transfer ratio | 0.968 | **High** - Account switching behavior |
@@ -99,7 +102,7 @@ TRANSFER_TYPE_RISK = {'S': 0.9, 'I': 0.1, 'L': 0.2, 'Q': 0.5, 'O': 0.0}
 ### **⚡ Velocity & Frequency Features (6 features)**
 
 | Feature | Calculation | Description | Example | ML Impact |
-|---------|-------------|-------------|---------|-----------|
+| --- | --- | --- | --- | --- |
 | `txn_count_30s` | `count(transactions_last_30_seconds)` | Transactions in last 30 seconds | 1 | **Very High** - Burst detection |
 | `txn_count_10min` | `count(transactions_last_10_minutes)` | Transactions in last 10 minutes | 1 | **Very High** - Short-term velocity |
 | `txn_count_1hour` | `count(transactions_last_1_hour)` | Transactions in last hour | 1 | **High** - Hourly velocity |
@@ -111,8 +114,9 @@ TRANSFER_TYPE_RISK = {'S': 0.9, 'I': 0.1, 'L': 0.2, 'Q': 0.5, 'O': 0.0}
 ### **📊 Advanced Analytics Features (8 features)**
 
 #### **Weekly Pattern Analysis**
+
 | Feature | Calculation | Description | Example | ML Impact |
-|---------|-------------|-------------|---------|-----------|
+| --- | --- | --- | --- | --- |
 | `weekly_total` | `sum(amounts_this_week)` | Total weekly spending | 230556.11 | **High** - Weekly spending pattern |
 | `weekly_txn_count` | `count(transactions_this_week)` | Weekly transaction count | 21 | **Medium** - Weekly activity level |
 | `weekly_avg_amount` | `mean(amounts_this_week)` | Weekly average amount | 10978.86 | **High** - Weekly baseline |
@@ -120,8 +124,9 @@ TRANSFER_TYPE_RISK = {'S': 0.9, 'I': 0.1, 'L': 0.2, 'Q': 0.5, 'O': 0.0}
 | `amount_vs_weekly_avg` | `amount / weekly_avg_amount` | Ratio to weekly average | 0.046 | **High** - Relative weekly size |
 
 #### **Monthly Pattern Analysis**
+
 | Feature | Calculation | Description | Example | ML Impact |
-|---------|-------------|-------------|---------|-----------|
+| --- | --- | --- | --- | --- |
 | `current_month_spending` | `sum(amounts_this_month)` | Monthly spending total | 410584.08 | **High** - Monthly spending level |
 | `monthly_txn_count` | `count(transactions_this_month)` | Monthly transaction count | 45 | **Medium** - Monthly activity |
 | `monthly_avg_amount` | `mean(amounts_this_month)` | Monthly average amount | 9124.09 | **High** - Monthly baseline |
@@ -129,13 +134,15 @@ TRANSFER_TYPE_RISK = {'S': 0.9, 'I': 0.1, 'L': 0.2, 'Q': 0.5, 'O': 0.0}
 | `amount_vs_monthly_avg` | `amount / monthly_avg_amount` | Ratio to monthly average | 0.055 | **High** - Relative monthly size |
 
 #### **Statistical Measures**
+
 | Feature | Calculation | Description | Example | ML Impact |
-|---------|-------------|-------------|---------|-----------|
+| --- | --- | --- | --- | --- |
 | `rolling_std` | `std(last_5_transactions)` | Rolling standard deviation | 0 | **High** - Recent variability |
 
 ## 🎯 **Feature Importance Rankings**
 
 ### **Critical Features (Very High Impact)**
+
 1. `transaction_amount` - Core transaction value
 2. `deviation_from_avg` - User behavior deviation
 3. `is_new_beneficiary` - New relationship indicator
@@ -144,6 +151,7 @@ TRANSFER_TYPE_RISK = {'S': 0.9, 'I': 0.1, 'L': 0.2, 'Q': 0.5, 'O': 0.0}
 6. `user_high_risk_txn_ratio` - Risk behavior pattern
 
 ### **Important Features (High Impact)**
+
 1. `flag_amount` - International transfer indicator
 2. `transfer_type_encoded` - Transfer type classification
 3. `transfer_type_risk` - Direct risk scoring
@@ -156,6 +164,7 @@ TRANSFER_TYPE_RISK = {'S': 0.9, 'I': 0.1, 'L': 0.2, 'Q': 0.5, 'O': 0.0}
 10. `geo_anomaly_flag` - Geographic anomaly
 
 ### **Supporting Features (Medium Impact)**
+
 1. `channel_encoded` - Channel patterns
 2. `hour` - Time-based patterns
 3. `day_of_week` - Day patterns
@@ -167,16 +176,19 @@ TRANSFER_TYPE_RISK = {'S': 0.9, 'I': 0.1, 'L': 0.2, 'Q': 0.5, 'O': 0.0}
 ## 📈 **Data Quality Metrics**
 
 ### **Completeness**
+
 - **Missing Values**: < 0.1% across all features
 - **Data Coverage**: 100% of transactions have all 41 features
 - **Temporal Coverage**: Full historical data for behavioral features
 
 ### **Consistency**
+
 - **Logical Relationships**: weekly_total ≥ daily_total ≥ hourly_total
 - **Range Validation**: All features within expected ranges
 - **Type Consistency**: Proper data types maintained
 
 ### **Statistical Properties**
+
 ```python
 # Feature Statistics Example
 {
@@ -198,7 +210,7 @@ TRANSFER_TYPE_RISK = {'S': 0.9, 'I': 0.1, 'L': 0.2, 'Q': 0.5, 'O': 0.0}
 ## 🔧 **Feature Engineering Process**
 
 ### **Calculation Dependencies**
-```
+
 Raw Transaction Data
     ↓
 DateTime Processing → Temporal Features (8)
@@ -214,9 +226,9 @@ Velocity Calculation → Frequency Features (6)
 Pattern Analysis → Analytics Features (8)
     ↓
 41 Complete Features
-```
 
 ### **Update Frequency**
+
 - **Real-time**: Velocity and frequency features
 - **Hourly**: Hourly totals and counts
 - **Daily**: Daily aggregations
@@ -226,18 +238,21 @@ Pattern Analysis → Analytics Features (8)
 ## 🎯 **Usage in ML Models**
 
 ### **Isolation Forest**
+
 - Uses all 41 features equally
 - Features are StandardScaler normalized
 - No feature selection applied
 - All features contribute to anomaly scoring
 
 ### **Autoencoder**
+
 - Uses all 41 features as input/output
 - Features are StandardScaler normalized
 - Network learns feature relationships
 - Reconstruction error indicates anomalies
 
 ### **Feature Preprocessing**
+
 ```python
 # Standardization Applied to All Features
 scaler = StandardScaler()
@@ -246,5 +261,3 @@ normalized_features = scaler.fit_transform(features)
 # Result: mean=0, std=1 for all features
 # Ensures equal contribution to ML models
 ```
-
-This comprehensive feature set provides rich behavioral, temporal, and statistical information that enables sophisticated fraud detection while maintaining interpretability and business relevance.
