@@ -3,6 +3,7 @@
 TRANSFER_MULTIPLIERS = {'S': 2.0, 'Q': 2.5, 'L': 3.0, 'I': 3.5, 'O': 4.0}
 TRANSFER_MIN_FLOORS = {'S': 5000, 'Q': 3000, 'L': 2000, 'I': 1500, 'O': 1000}
 
+MAX_VELOCITY_30s = 3
 MAX_VELOCITY_10MIN = 5
 MAX_VELOCITY_1HOUR = 15
 
@@ -22,6 +23,7 @@ def check_rule_violation(
     user_avg,
     user_std,
     transfer_type,
+    txn_count_30s,
     txn_count_10min,
     txn_count_1hour,
     monthly_spending
@@ -30,6 +32,13 @@ def check_rule_violation(
     violated = False
     threshold = calculate_threshold(user_avg, user_std, transfer_type)
 
+    if txn_count_30s > MAX_VELOCITY_30s:
+        violated = True
+        reasons.append(
+            f"Velocity limit exceeded: {txn_count_30s} transactions in last 30 seconds "
+            f"(max allowed {MAX_VELOCITY_30s})"
+        )
+        
     if txn_count_10min > MAX_VELOCITY_10MIN:
         violated = True
         reasons.append(
