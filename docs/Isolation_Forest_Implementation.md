@@ -37,7 +37,7 @@ Decision = Compare Score Against Contamination Threshold
 ### **Data Preparation**
 
 ```python
-# Feature Loading (41 features from utils.MODEL_FEATURES)
+# Feature Loading (42 features from utils.MODEL_FEATURES)
 features = [
     'transaction_amount', 'flag_amount', 'transfer_type_encoded',
     'transfer_type_risk', 'channel_encoded', 'deviation_from_avg',
@@ -59,7 +59,7 @@ max_features = 1.0        # Use all features
 
 ### **Training Pipeline**
 
-1. **Data Loading**: Load `feature_datasetv2.csv` with 41 engineered features
+1. **Data Loading**: Load `feature_datasetv2.csv` with 42 engineered features
 2. **Feature Scaling**: StandardScaler normalization (mean=0, std=1)
 3. **Model Training**: Fit Isolation Forest on normal transaction patterns
 4. **Model Validation**: Test on holdout data for performance metrics
@@ -72,7 +72,7 @@ max_features = 1.0        # Use all features
 ```python
 class IsolationForestInference:
     def score_transaction(self, features):
-        # 1. Feature Validation (ensure all 41 features present)
+        # 1. Feature Validation (ensure all 42 features present)
         # 2. Feature Scaling (apply training scaler)
         # 3. Anomaly Scoring (get decision function score)
         # 4. Binary Prediction (normal=1, anomaly=-1)
@@ -131,7 +131,7 @@ class IsolationForestInference:
 
 - **No Labeled Data Required**: Unsupervised learning approach
 - **Efficient**: Linear time complexity O(n)
-- **Robust**: Works well with high-dimensional data (41 features)
+- **Robust**: Works well with high-dimensional data (42 features)
 - **Interpretable**: Can identify which features contribute to anomaly score
 
 ### **Limitations**
@@ -148,7 +148,7 @@ class IsolationForestInference:
 ```python
 class IsolationForestTrainer:
     def train(self):
-        # Load feature-engineered data (41 features)
+        # Load feature-engineered data (42 features)
         # Apply StandardScaler normalization
         # Configure Isolation Forest parameters
         # Train model on normal transaction patterns
@@ -162,7 +162,7 @@ class IsolationForestTrainer:
 class IsolationForestInference:
     def score_transaction(self, features):
         # Load trained model and scaler
-        # Validate input features (41 required)
+        # Validate input features (42 required)
         # Apply feature scaling
         # Compute anomaly score
         # Generate binary prediction
@@ -174,7 +174,7 @@ class IsolationForestInference:
 ### **Training Metrics**
 
 - **Contamination Rate**: 10% (expected fraud rate)
-- **Feature Count**: 41 engineered features
+- **Feature Count**: 42 engineered features
 - **Training Time**: < 30 seconds on standard hardware
 - **Model Size**: ~2MB (model + scaler)
 
@@ -258,7 +258,7 @@ else:
 
 ### **Feature Engineering Dependency**
 
-- **Relies on**: 41 features from `feature_engineering.py`
+- **Relies on**: 42 features from `feature_engineering.py`
 - **Centralized Config**: Uses `MODEL_FEATURES` from `utils.py`
 - **Consistency**: Same features used for training and inference
 

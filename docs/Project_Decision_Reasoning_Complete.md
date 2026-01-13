@@ -68,7 +68,7 @@ This document provides comprehensive reasoning behind every design decision in t
 - **Unsupervised Learning**: No labeled fraud data required
 - **Efficiency**: Linear time complexity O(n)
 - **Interpretability**: Path length provides clear anomaly reasoning
-- **High Dimensional Data**: Works well with 41 features
+- **High Dimensional Data**: Works well with 42 features
 - **Robust**: Less sensitive to outliers than distance-based methods
 - **Proven**: Widely used in financial fraud detection
 - **Ensemble Method**: More stable than single tree approaches
@@ -83,7 +83,7 @@ This document provides comprehensive reasoning behind every design decision in t
 
 ### **Why Autoencoder Neural Network?**
 
-#### **✅ Our Choice: Autoencoder (41→64→32→14→32→64→41)**
+#### **✅ Our Choice: Autoencoder (42→64→32→14→32→64→42)**
 **Reasoning:**
 - **Behavioral Learning**: Learns complex transaction patterns
 - **Reconstruction Error**: Natural anomaly measure
@@ -101,9 +101,9 @@ This document provides comprehensive reasoning behind every design decision in t
 - **Recurrent Networks (LSTM/GRU)**: For time series, not individual transactions
 - **Simple Neural Networks**: No compression, less anomaly detection capability
 
-### **Why 41 Features Specifically?**
+### **Why 42 Features Specifically?**
 
-#### **✅ Our Choice: 41 Engineered Features**
+#### **✅ Our Choice: 42 Engineered Features**
 **Reasoning:**
 - **Comprehensive Coverage**: Captures all fraud indicators
 - **Behavioral Patterns**: User history and deviations
@@ -174,13 +174,13 @@ This document provides comprehensive reasoning behind every design decision in t
 - **Dynamic Contamination**: Complex to implement and explain
 - **No Contamination Setting**: Algorithm requires this parameter
 
-### **Why Autoencoder Architecture 41→64→32→14→32→64→41?**
+### **Why Autoencoder Architecture 42→64→32→14→32→64→42?**
 
 #### **✅ Our Choice: Symmetric Architecture with Bottleneck**
 **Reasoning:**
-- **Information Bottleneck**: 14 neurons force compression (41→14 = 66% compression)
+- **Information Bottleneck**: 14 neurons force compression (42→14 = 66% compression)
 - **Symmetric Design**: Encoder mirrors decoder for balanced learning
-- **Layer Sizes**: Gradual compression (41→64→32→14) prevents information loss
+- **Layer Sizes**: Gradual compression (42→64→32→14) prevents information loss
 - **Sufficient Capacity**: 64/32 neurons handle feature complexity
 - **Proven Architecture**: Standard autoencoder design pattern
 - **Computational Efficiency**: Not too large for real-time inference

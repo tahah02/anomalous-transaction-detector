@@ -448,7 +448,7 @@ START
                       ┌─────────────┐ ┌─────────────┐
                       │ SUCCESS     │ │ ERROR       │
                       │ Display     │ │ Display     │
-                      │ ✅ SAFE     │ │ 🚨 FRAUD    │
+                      │ SAFE        │ │ FRAUD       │
                       │ TRANSACTION │ │ ALERT       │
                       └─────────────┘ └─────────────┘
                              │         │

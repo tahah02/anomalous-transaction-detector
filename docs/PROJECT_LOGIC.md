@@ -13,7 +13,7 @@ Yeh system banking transactions ko analyze karta hai aur fraud/anomalies detect 
 ```
 ├── app.py                    # Main Streamlit application
 ├── backend/
-│   ├── utils.py              # Helper functions aur constants (41 features)
+│   ├── utils.py              # Helper functions aur constants (42 features)
 │   ├── rule_engine.py        # Dynamic threshold calculations
 │   ├── feature_engineering.py # Data ko ML-ready features mein convert
 │   ├── train_isolation_forest.py # Isolation Forest model training
@@ -29,7 +29,7 @@ Yeh system banking transactions ko analyze karta hai aur fraud/anomalies detect 
 │       └── autoencoder_threshold.json
 ├── data/
 │   ├── Clean.csv             # Original clean transaction data
-│   └── feature_datasetv2.csv # Processed features wala data (41 features)
+│   └── feature_datasetv2.csv # Processed features wala data (42 features)
 ├── docs/                     # Documentation folder
 │   ├── BRD.md               # Business Requirements Document
 │   ├── PROJECT_LOGIC.md     # This documentation file
@@ -68,7 +68,7 @@ TRANSFER_TYPE_ENCODED = {'S': 4, 'I': 1, 'L': 2, 'Q': 3, 'O': 0}
 # Risk scores (0 to 1, higher = more risky)
 TRANSFER_TYPE_RISK = {'S': 0.9, 'I': 0.1, 'L': 0.2, 'Q': 0.5, 'O': 0.0}
 
-# Centralized Features List (41 features)
+# Centralized Features List (42 features)
 MODEL_FEATURES = [
     'transaction_amount','flag_amount','transfer_type_encoded','transfer_type_risk',
     'channel_encoded','deviation_from_avg','amount_to_max_ratio','rolling_std',
@@ -102,14 +102,14 @@ MODEL_FEATURES = [
 - **Clean Architecture**: Training aur inference separate
 - **Production Ready**: Fast inference without training overhead
 - **Memory Efficient**: Sirf inference models load karte hain production mein
-- **Consistent Features**: Sab models same 41 features use karte hain
+- **Consistent Features**: Sab models same 42 features use karte hain
 
 ---
 
-## 3. Enhanced Feature Engineering (41 Features)
+## 3. Enhanced Feature Engineering (42 Features)
 
 ### Purpose:
-Raw transaction data ko ML model ke liye 41 useful features mein convert karta hai.
+Raw transaction data ko ML model ke liye 42 useful features mein convert karta hai.
 
 ### New Features Added:
 
@@ -146,7 +146,7 @@ Behavioral pattern analysis aur subtle anomaly detection.
 
 ### Architecture:
 ```python
-Input Layer (41 features)
+Input Layer (42 features)
     ↓
 Hidden Layer (64 neurons) + BatchNorm + ReLU
     ↓  
@@ -158,7 +158,7 @@ Hidden Layer (32 neurons) + BatchNorm + ReLU
     ↓
 Hidden Layer (64 neurons) + BatchNorm + ReLU
     ↓
-Output Layer (41 features)
+Output Layer (42 features)
 ```
 
 ### How it Works:
@@ -170,7 +170,7 @@ Threshold = mean_error + (3 × std_error)
 ```
 
 ### Training Process:
-1. **Data Loading**: feature_datasetv2.csv (41 features)
+1. **Data Loading**: feature_datasetv2.csv (42 features)
 2. **Scaling**: StandardScaler for normalization
 3. **Training**: 100 epochs with early stopping
 4. **Threshold Calculation**: Statistical threshold from training errors
@@ -187,7 +187,7 @@ Threshold = mean_error + (3 × std_error)
                           ↓
               ┌───────────────────────┐
               │   Prepare Features    │
-              │    (41 features)      │
+              │    (42 features)      │
               └───────────┬───────────┘
                           ↓
          ┌────────────────┼────────────────┐
@@ -239,7 +239,7 @@ backend/model/
 ### New Capabilities:
 1. **Dual ML Models**: Both Isolation Forest aur Autoencoder
 2. **Detailed Scoring**: Individual model scores aur combined result
-3. **Enhanced Features**: 41 features instead of 26
+3. **Enhanced Features**: 42 features instead of 26
 4. **Better Architecture**: Clean separation of training/inference
 5. **Improved UI**: More detailed results aur explanations
 
@@ -272,7 +272,7 @@ def enhanced_analysis(transaction):
       ↓
 3. Click "Analyze Transaction"
       ↓
-4. Feature Engineering (41 features from utils.MODEL_FEATURES)
+4. Feature Engineering (42 features from utils.MODEL_FEATURES)
       ↓
 5. Rule Engine Check (velocity + amount limits)
       ↓
@@ -297,7 +297,7 @@ def enhanced_analysis(transaction):
 
 ## Why These Enhancements?
 
-### Why 41 Features?
+### Why 4 Features?
 - **More Comprehensive**: Better capture of user behavior
 - **Temporal Patterns**: Weekly/monthly spending analysis
 - **Enhanced Detection**: More sophisticated anomaly detection
@@ -340,7 +340,7 @@ def enhanced_analysis(transaction):
 Enhanced system ab provide karta hai:
 
 1. **Triple-Layer Protection** - Rules + Isolation Forest + Autoencoder
-2. **41 Advanced Features** - Comprehensive behavioral analysis
+2. **42 Advanced Features** - Comprehensive behavioral analysis
 3. **Clean Architecture** - Separate training/inference, centralized config
 4. **Production Ready** - Optimized for real-time processing
 5. **Scalable Design** - Easy to add new models and features

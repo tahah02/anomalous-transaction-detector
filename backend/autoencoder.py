@@ -37,7 +37,7 @@ class TransactionAutoencoder:
         model.compile(optimizer='adam', loss='mean_squared_error')
         return model
 
-    def fit(self, X: np.ndarray, epochs=100, batch_size=32,
+    def fit(self, X: np.ndarray, epochs=100, batch_size=64,
             validation_split=0.1, verbose=1):
         return self.model.fit(
             X, X,
