@@ -285,6 +285,7 @@ def analyze_transaction(request: TransactionRequest):
         "amount": request.transaction_amount,
         "transfer_type": request.transfer_type,
         "bank_country": request.bank_country,
+        "txn_count_30s": 1,  # Default to 1 for current transaction
         "txn_count_10min": velocity["txn_count_10min"] + 1,
         "txn_count_1hour": velocity["txn_count_1hour"] + 1,
         "time_since_last_txn": velocity["time_since_last_txn"],

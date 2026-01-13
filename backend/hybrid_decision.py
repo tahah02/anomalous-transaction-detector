@@ -79,6 +79,7 @@ def make_decision(txn, user_stats, model, features, autoencoder=None):
             'is_night': 0,
             'time_since_last': time_since_last,
             'recent_burst': 1 if time_since_last < 300 else 0,
+            'txn_count_30s': txn.get('txn_count_30s', 1),
             'txn_count_10min': txn.get('txn_count_10min', 1),
             'txn_count_1hour': txn.get('txn_count_1hour', 1),
             'user_avg_amount': user_avg,
