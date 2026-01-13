@@ -18,6 +18,7 @@ def make_decision(txn, user_stats, model, features, autoencoder=None):
         user_avg=user_stats["user_avg_amount"],
         user_std=user_stats["user_std_amount"],
         transfer_type=txn["transfer_type"],
+        txn_count_30s=txn["txn_count_30s"],
         txn_count_10min=txn["txn_count_10min"],
         txn_count_1hour=txn["txn_count_1hour"],
         monthly_spending=user_stats["current_month_spending"],
@@ -42,33 +43,57 @@ def make_decision(txn, user_stats, model, features, autoencoder=None):
                 f"ML anomaly detected: abnormal behavior pattern (risk score {score:.4f})"
             )
     if autoencoder is not None:
-        ae_features = {
-            'transaction_amount': txn.get('amount', 0),
+        amount = txn.get('amount', 0)
+        user_avg = user_stats.get('user_avg_amount', 5000)
+        user_max = max(user_stats.get('user_max_amount', 1), 1)
+        weekly_avg = user_stats.get('user_weekly_avg_amount', 0)
+        monthly_avg = user_stats.get('monthly_avg_amount', user_avg)
+        time_since_last = txn.get('time_since_last_txn', 3600)
+        
+        ae_features = { 
+            'transaction_amount': amount,
             'flag_amount': 1 if txn.get('transfer_type') == 'S' else 0,
             'transfer_type_encoded': {'S': 4, 'I': 1, 'L': 2, 'Q': 3, 'O': 0}.get(txn.get('transfer_type', 'O'), 0),
             'transfer_type_risk': {'S': 0.9, 'I': 0.1, 'L': 0.2, 'Q': 0.5, 'O': 0.0}.get(txn.get('transfer_type', 'O'), 0.5),
             'channel_encoded': 0,
-            'deviation_from_avg': abs(txn.get('amount', 0) - user_stats.get('user_avg_amount', 0)),
-            'amount_to_max_ratio': txn.get('amount', 0) / max(user_stats.get('user_max_amount', 1), 1),
+            'deviation_from_avg': abs(amount - user_avg),
+            'amount_to_max_ratio': amount / user_max,
             'rolling_std': user_stats.get('user_std_amount', 0),
+            'transaction_velocity': 3600 / max(time_since_last, 1),
+            'weekly_total': user_stats.get('user_weekly_total', 0),           
+            'weekly_txn_count': user_stats.get('user_weekly_txn_count', 0),       
+            'weekly_avg_amount': weekly_avg,      
+            'weekly_deviation': abs(amount - weekly_avg) if weekly_avg > 0 else 0,
+            'amount_vs_weekly_avg': amount / max(weekly_avg, 1) if weekly_avg > 0 else 1,
+            'current_month_spending': user_stats.get('current_month_spending', 0),
+            'monthly_txn_count': user_stats.get('monthly_txn_count', user_stats.get('user_txn_frequency', 0)),
+            'monthly_avg_amount': monthly_avg,
+            'monthly_deviation': abs(amount - monthly_avg),
+            'amount_vs_monthly_avg': amount / max(monthly_avg, 1),
+            'hourly_total': amount,
+            'hourly_count': 1,
+            'daily_total': amount,
+            'daily_count': 1,
             'hour': 12,  
             'day_of_week': 0,
             'is_weekend': 0,
             'is_night': 0,
-            'user_avg_amount': user_stats.get('user_avg_amount', 0),
+            'time_since_last': time_since_last,
+            'recent_burst': 1 if time_since_last < 300 else 0,
+            'txn_count_30s': 1,
+            'txn_count_10min': txn.get('txn_count_10min', 1),
+            'txn_count_1hour': txn.get('txn_count_1hour', 1),
+            'user_avg_amount': user_avg,
             'user_std_amount': user_stats.get('user_std_amount', 0),
             'user_max_amount': user_stats.get('user_max_amount', 0),
             'user_txn_frequency': user_stats.get('user_txn_frequency', 0),
             'intl_ratio': user_stats.get('user_international_ratio', 0),
-            'time_since_last': txn.get('time_since_last_txn', 3600),
-            'recent_burst': 1 if txn.get('time_since_last_txn', 3600) < 300 else 0,
-            'txn_count_30s': 1,
-            'txn_count_10min': txn.get('txn_count_10min', 1),
-            'txn_count_1hour': txn.get('txn_count_1hour', 1),
-            'hourly_total': txn.get('amount', 0),
-            'hourly_count': 1,
-            'daily_total': txn.get('amount', 0),
-            'daily_count': 1,
+            'user_high_risk_txn_ratio': user_stats.get('user_high_risk_txn_ratio', 0.5),
+            'user_multiple_accounts_flag': 1 if user_stats.get('num_accounts', 1) > 1 else 0,
+            'cross_account_transfer_ratio': user_stats.get('cross_account_transfer_ratio', 0),
+            'geo_anomaly_flag': 1 if txn.get('bank_country', 'UAE') not in ['UAE', 'United Arab Emirates'] else 0,
+            'is_new_beneficiary': txn.get('is_new_beneficiary', 0),
+            'beneficiary_txn_count_30d': user_stats.get('beneficiary_txn_count_30d', 1),
         }
         
         ae_result = autoencoder.score_transaction(ae_features)

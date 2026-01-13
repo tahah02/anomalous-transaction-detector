@@ -73,6 +73,15 @@ class UserStatsManager:
         key = f"{customer_id}_{account_no}"
         
         if key in self.stats:
+            # OPTIONAL: Ensure old cached stats get new keys if missing
+            if "user_weekly_total" not in self.stats[key]:
+                self.stats[key].update({
+                    "user_transaction_velocity": 0,
+                    "user_weekly_total": 0.0,
+                    "user_weekly_txn_count": 0,
+                    "user_weekly_avg_amount": 0.0,
+                    "user_weekly_deviation": 0.0
+                })
             return self.stats[key]
         
         if not self.historical_data.empty:
@@ -103,7 +112,13 @@ class UserStatsManager:
                     "user_max_amount": float(overall_max),
                     "user_txn_frequency": int(total_txns_count),
                     "user_international_ratio": float(intl_ratio),
-                    "current_month_spending": float(current_month_spending)
+                    "current_month_spending": float(current_month_spending),
+                    # --- ADDED NEW KEYS (Defaulting to 0 for now) ---
+                    "user_transaction_velocity": 0,
+                    "user_weekly_total": 0.0,
+                    "user_weekly_txn_count": 0,
+                    "user_weekly_avg_amount": 0.0,
+                    "user_weekly_deviation": 0.0
                 }
             else:
                 self.stats[key] = {
@@ -112,7 +127,13 @@ class UserStatsManager:
                     "user_max_amount": 15000.0,
                     "user_txn_frequency": 0,
                     "user_international_ratio": 0.0,
-                    "current_month_spending": 0.0
+                    "current_month_spending": 0.0,
+                    # --- ADDED NEW KEYS ---
+                    "user_transaction_velocity": 0,
+                    "user_weekly_total": 0.0,
+                    "user_weekly_txn_count": 0,
+                    "user_weekly_avg_amount": 0.0,
+                    "user_weekly_deviation": 0.0
                 }
         else:
             self.stats[key] = {
@@ -121,11 +142,16 @@ class UserStatsManager:
                 "user_max_amount": 15000.0,
                 "user_txn_frequency": 0,
                 "user_international_ratio": 0.0,
-                "current_month_spending": 0.0
+                "current_month_spending": 0.0,
+                # --- ADDED NEW KEYS ---
+                "user_transaction_velocity": 0,
+                "user_weekly_total": 0.0,
+                "user_weekly_txn_count": 0,
+                "user_weekly_avg_amount": 0.0,
+                "user_weekly_deviation": 0.0
             }
         
         return self.stats[key]
-
     
     def get_monthly_spending_from_csv(self, customer_id: str, account_no: str):
         if self.historical_data.empty:
@@ -208,6 +234,26 @@ class UserStatsManager:
         stats["current_month_spending"] = csv_monthly + self.stats[session_key]
         
         self.save_stats()
+    
+    def save_transaction_history(self, request, decision: str, result: dict, transaction_id: str):
+        history_file = "data/transaction_history.csv"
+        
+        # Simple format with only essential fields
+        txn_record = {
+            "transaction_id": transaction_id,
+            "customer_id": request.customer_id,
+            "account_no": request.from_account_no,
+            "amount": request.transaction_amount,
+            "status": decision,
+            "reasons": "|".join(result.get('reasons', [])) if result.get('reasons') else "Normal transaction"
+        }
+        
+        df_new = pd.DataFrame([txn_record])
+        
+        if os.path.exists(history_file):
+            df_new.to_csv(history_file, mode='a', header=False, index=False)
+        else:
+            df_new.to_csv(history_file, index=False)
 
 stats_manager = UserStatsManager()
 model, features, scaler = load_model()
@@ -249,11 +295,14 @@ def analyze_transaction(request: TransactionRequest):
     
     decision = "REQUIRES_USER_APPROVAL" if result['is_fraud'] else "APPROVED"
     
-    if decision == "APPROVED":
-        stats_manager.record_transaction(request.customer_id, request.from_account_no, request.transaction_amount)
-    
     processing_time = int((datetime.now() - start_time).total_seconds() * 1000)
     transaction_id = f"txn_{request.datetime.strftime('%Y%m%d_%H%M%S')}_{request.customer_id}"
+    
+    # Save transaction history (both APPROVED and REQUIRES_USER_APPROVAL)
+    stats_manager.save_transaction_history(request, decision, result, transaction_id)
+    
+    if decision == "APPROVED":
+        stats_manager.record_transaction(request.customer_id, request.from_account_no, request.transaction_amount)
     
     return TransactionResponse(
         decision=decision,
