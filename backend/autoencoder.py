@@ -73,8 +73,6 @@ class AutoencoderInference:
     SCALER_PATH = 'backend/model/autoencoder_scaler.pkl'
     THRESHOLD_PATH = 'backend/model/autoencoder_threshold.json'
 
-
-
     def __init__(self):
         self.model = None
         self.scaler = None

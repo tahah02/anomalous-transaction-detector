@@ -175,9 +175,9 @@ def dashboard(df, model, features, scaler=None, autoencoder=None):
     st.sidebar.markdown("---")
     
     if autoencoder is not None:
-        st.sidebar.success("🧠 Autoencoder: Active")
+        st.sidebar.success(" Autoencoder: Active")
     else:
-        st.sidebar.warning("🧠 Autoencoder: Unavailable")
+        st.sidebar.warning(" Autoencoder: Unavailable")
     
     st.sidebar.markdown("---")
     st.sidebar.subheader("Account Statistics")
@@ -192,13 +192,11 @@ def dashboard(df, model, features, scaler=None, autoencoder=None):
         st.sidebar.metric("Total Transactions", total_txns, 
                          delta=f"+{session_count} this session" if session_count > 0 else None)
         
-        # Velocity display
         st.sidebar.markdown("---")
         st.sidebar.subheader("Current Velocity")
         st.sidebar.markdown(f"**Last 10 min:** {vel['txn_count_10min']} transactions")
         st.sidebar.markdown(f"**Last 1 hour:** {vel['txn_count_1hour']} transactions")
         
-        # Monthly spending
         csv_monthly = get_monthly_spending_from_csv(cust_data, account, amt_col)
         session_monthly = st.session_state.monthly_spending.get(account_key, 0.0)
         total_monthly = csv_monthly + session_monthly
@@ -206,8 +204,6 @@ def dashboard(df, model, features, scaler=None, autoencoder=None):
         st.sidebar.markdown("---")
         st.sidebar.subheader("Monthly Spending")
         st.sidebar.markdown(f"**This Month:** AED {total_monthly:,.2f}")
-        
-        # Limits
         st.sidebar.markdown("---")
         st.sidebar.subheader("Transfer Type Limits")
         limits = calculate_all_limits(avg, std)
@@ -250,7 +246,7 @@ def dashboard(df, model, features, scaler=None, autoencoder=None):
     st.subheader("Step 3: Process Transaction")
  
     current_vel = get_velocity(cid, account)
-    st.caption(f"🔍 Debug: Current recorded txns - 10min: {current_vel['txn_count_10min']}, 1hour: {current_vel['txn_count_1hour']}")
+    st.caption(f" Debug: Current recorded txns - 10min: {current_vel['txn_count_10min']}, 1hour: {current_vel['txn_count_1hour']}")
     
     if st.button("Process Transaction", type="primary", use_container_width=True):
         current_vel = get_velocity(cid, account)
@@ -311,7 +307,7 @@ def dashboard(df, model, features, scaler=None, autoencoder=None):
         
         if r.get('ae_reconstruction_error') is not None:
             ae_status = " Anomaly" if r.get('ae_flag', False) else " Normal"
-            st.info(f"🔬 AE Error: {r['ae_reconstruction_error']:.4f} | Threshold: {r.get('ae_threshold', 'N/A'):.4f} | Status: {ae_status}")
+            st.info(f" AE Error: {r['ae_reconstruction_error']:.4f} | Threshold: {r.get('ae_threshold', 'N/A'):.4f} | Status: {ae_status}")
         
         if r['is_fraud']:
             st.error(" FRAUD ALERT - Transaction Flagged!")

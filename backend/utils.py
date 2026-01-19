@@ -25,7 +25,7 @@ MODEL_FEATURES = [
     'weekly_deviation','amount_vs_weekly_avg','current_month_spending','monthly_txn_count',
     'monthly_avg_amount','monthly_deviation','amount_vs_monthly_avg','hourly_total',
     'hourly_count','daily_total','daily_count','hour','day_of_week','is_weekend',
-    'is_night','time_since_last','recent_burst','txn_count_10min',
+    'is_night','time_since_last','recent_burst','txn_count_30s','txn_count_10min',
     'txn_count_1hour','user_avg_amount','user_std_amount','user_max_amount',
     'user_txn_frequency','intl_ratio','user_high_risk_txn_ratio',
     'user_multiple_accounts_flag','cross_account_transfer_ratio',
@@ -36,15 +36,11 @@ def load_model():
     try:
         model_path = get_model_path()
         scaler_path = 'backend/model/isolation_forest_scaler.pkl'
-        
-        # Load model (could be dict or direct model)
         model_data = joblib.load(model_path)
         if isinstance(model_data, dict):
             model = model_data.get('model', model_data)
         else:
             model = model_data
-            
-        # Load scaler
         scaler = None
         try:
             scaler = joblib.load(scaler_path)

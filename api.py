@@ -128,7 +128,6 @@ class UserStatsManager:
                     "user_txn_frequency": 0,
                     "user_international_ratio": 0.0,
                     "current_month_spending": 0.0,
-                    # --- ADDED NEW KEYS ---
                     "user_transaction_velocity": 0,
                     "user_weekly_total": 0.0,
                     "user_weekly_txn_count": 0,
@@ -143,7 +142,6 @@ class UserStatsManager:
                 "user_txn_frequency": 0,
                 "user_international_ratio": 0.0,
                 "current_month_spending": 0.0,
-                # --- ADDED NEW KEYS ---
                 "user_transaction_velocity": 0,
                 "user_weekly_total": 0.0,
                 "user_weekly_txn_count": 0,
@@ -202,12 +200,12 @@ class UserStatsManager:
     
     def check_is_new_beneficiary(self, customer_id: str, recipient_account: str):
         if self.historical_data.empty:
-            return 1 # Default to new if no history
+            return 1 
             
         cust_data = self.historical_data[self.historical_data['CustomerId'].astype(str) == str(customer_id)]
         
         if 'ReceipentAccount' not in cust_data.columns and 'RecipientAccount' not in cust_data.columns:
-            return 0 # Cannot verify, assume safe/old to avoid false positives if column missing
+            return 0 
             
         col_name = 'ReceipentAccount' if 'ReceipentAccount' in cust_data.columns else 'RecipientAccount'
         
@@ -238,7 +236,6 @@ class UserStatsManager:
     def save_transaction_history(self, request, decision: str, result: dict, transaction_id: str):
         history_file = "data/transaction_history.csv"
         
-        # Simple format with only essential fields
         txn_record = {
             "transaction_id": transaction_id,
             "customer_id": request.customer_id,
@@ -285,7 +282,7 @@ def analyze_transaction(request: TransactionRequest):
         "amount": request.transaction_amount,
         "transfer_type": request.transfer_type,
         "bank_country": request.bank_country,
-        "txn_count_30s": 1,  # Default to 1 for current transaction
+        "txn_count_30s": 1,  
         "txn_count_10min": velocity["txn_count_10min"] + 1,
         "txn_count_1hour": velocity["txn_count_1hour"] + 1,
         "time_since_last_txn": velocity["time_since_last_txn"],
@@ -298,8 +295,6 @@ def analyze_transaction(request: TransactionRequest):
     
     processing_time = int((datetime.now() - start_time).total_seconds() * 1000)
     transaction_id = f"txn_{request.datetime.strftime('%Y%m%d_%H%M%S')}_{request.customer_id}"
-    
-    # Save transaction history (both APPROVED and REQUIRES_USER_APPROVAL)
     stats_manager.save_transaction_history(request, decision, result, transaction_id)
     
     if decision == "APPROVED":
